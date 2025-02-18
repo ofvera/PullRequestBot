@@ -1,10 +1,28 @@
-require('dotenv').config();
+// src/config.js
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-module.exports = {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+dotenv.config();
+
+// Parse repos from environment variable
+const parseRepos = () => {
+  try {
+    return process.env.GITHUB_REPOS.split(',').map(repo => repo.trim());
+  } catch (error) {
+    console.error('Error parsing GITHUB_REPOS:', error);
+    return [];
+  }
+};
+
+export default {
   github: {
     token: process.env.GITHUB_TOKEN,
     owner: process.env.GITHUB_OWNER,
-    repo: process.env.GITHUB_REPO,
+    repos: parseRepos(),
   },
   slack: {
     token: process.env.SLACK_BOT_TOKEN,
@@ -13,6 +31,6 @@ module.exports = {
   },
   app: {
     port: process.env.PORT || 3000,
-    cronSchedule: process.env.CRON_SCHEDULE || '0 10 * * 1-5',
+    cronSchedule: process.env.CRON_SCHEDULE || '55 16 * * 1-5'
   }
 };

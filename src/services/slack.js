@@ -1,5 +1,7 @@
-const { App } = require('@slack/bolt');
-const config = require('../config');
+// src/services/slack.js
+import pkg from '@slack/bolt';
+const { App } = pkg;
+import config from '../config.js';
 
 const app = new App({
   token: config.slack.token,
@@ -12,12 +14,28 @@ function formatPRMessage(prs) {
   }
 
   const header = ":github: *Open Pull Requests Update*\n\n";
-  const prList = prs.map(pr => {
-    const age = Math.floor((new Date() - new Date(pr.created_at)) / (1000 * 60 * 60 * 24));
-    return `• <${pr.html_url}|${pr.title}>\n   *Author:* ${pr.user.login} | *Age:* ${age} days | *Reviews:* ${pr.requested_reviewers.length}`;
-  }).join('\n\n');
+  
+  // Group PRs by repository
+  const prsByRepo = prs.reduce((acc, pr) => {
+    if (!acc[pr.repository]) {
+      acc[pr.repository] = [];
+    }
+    acc[pr.repository].push(pr);
+    return acc;
+  }, {});
 
-  return `${header}${prList}`;
+  // Format each repository's PRs
+  const repoSections = Object.entries(prsByRepo).map(([repo, repoPRs]) => {
+    const repoHeader = `*${repo}* (${repoPRs.length} open PRs)`;
+    const prList = repoPRs.map(pr => {
+      const age = Math.floor((new Date() - new Date(pr.created_at)) / (1000 * 60 * 60 * 24));
+      return `• <${pr.html_url}|${pr.title}>\n   *Author:* ${pr.user.login} | *Age:* ${age} days | *Reviews:* ${pr.requested_reviewers.length}`;
+    }).join('\n\n');
+    
+    return `${repoHeader}\n${prList}`;
+  }).join('\n\n---\n\n');
+
+  return `${header}${repoSections}`;
 }
 
 async function sendUpdate(prs) {
@@ -28,12 +46,11 @@ async function sendUpdate(prs) {
       text: message,
       parse: 'mrkdwn'
     });
+    return true;
   } catch (error) {
     console.error('Error sending Slack message:', error);
+    return false;
   }
 }
 
-module.exports = {
-  app,
-  sendUpdate
-};
+export { sendUpdate };

@@ -34,11 +34,11 @@ To deploy to Vercel:
 Push your code to GitHub
 Run these commands:
 
-´´´
+```
 npm i -g vercel
 vercel login
 vercel
-´´´
+```
 
 Set up environment variables in the Vercel dashboard
 Done! Your bot will be deployed and get a URL
