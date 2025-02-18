@@ -17,17 +17,11 @@ A Slack bot that provides scheduled updates about open pull requests in your Git
 - `GITHUB_OWNER`: Repository owner/organization name
 - `GITHUB_REPO`: Repository name
 - `SLACK_CHANNEL_ID`: Slack channel ID for updates
-- `CRON_SCHEDULE`: Cron schedule for updates (default: 10 AM on weekdays)
+- `CRON_SCHEDULE`: Cron schedule for updates (default: 9 AM GMT-3 on weekdays)
 
 ## Deployment
 
-Free deployment @ Vercel (Recommended):
-
 Sign up for a free account at vercel.com
-Install Vercel CLI: npm i -g vercel
-Run vercel in your project directory
-Set up environment variables in the Vercel dashboard
-The bot will be deployed and get a URL
 
 To deploy to Vercel:
 
@@ -38,6 +32,9 @@ Run these commands:
 npm i -g vercel
 vercel login
 vercel
+
+#When updating simply run
+vercel --prod
 ```
 
 Set up environment variables in the Vercel dashboard
