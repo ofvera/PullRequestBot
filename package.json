@@ -1,0 +1,22 @@
+{
+  "name": "pullrequestbot",
+  "version": "1.0.0",
+  "description": "Slack app to get pull request messages on a channel without the need of github teams",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@octokit/rest": "^21.1.1",
+    "@slack/bolt": "^4.2.0",
+    "dotenv": "^16.4.7",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
