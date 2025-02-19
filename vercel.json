@@ -1,17 +1,15 @@
 {
-  "version": 2,
+  "buildCommand": "next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
   "builds": [
-    {
-      "src": "api/cron.js",
-      "use": "@vercel/node"
-    }
+    { "src": "api/**/*.js", "use": "@vercel/node" },
+    { "src": "next.config.js", "use": "@vercel/next" }
   ],
   "routes": [
-    {
-      "src": "/api/cron",
-      "dest": "/api/cron.js",
-      "methods": ["GET"]
-    }
+    { "src": "/api/(.*)", "dest": "/api/$1" }
   ],
   "crons": [
     {
