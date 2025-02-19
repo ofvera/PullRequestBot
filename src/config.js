@@ -1,12 +1,4 @@
-// src/config.js
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-dotenv.config();
+require('dotenv').config();
 
 // Parse repos from environment variable
 const parseRepos = () => {
@@ -18,7 +10,7 @@ const parseRepos = () => {
   }
 };
 
-export default {
+module.exports = {
   github: {
     token: process.env.GITHUB_TOKEN,
     owner: process.env.GITHUB_OWNER,
@@ -31,6 +23,6 @@ export default {
   },
   app: {
     port: process.env.PORT || 3000,
-    cronSchedule: process.env.CRON_SCHEDULE || '55 16 * * 1-5'
+    cronSchedule: process.env.CRON_SCHEDULE || '0 12 * * 1-5'
   }
 };

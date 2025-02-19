@@ -1,6 +1,5 @@
-// src/services/github.js
-import { Octokit } from '@octokit/rest';
-import config from '../config.js';
+const { Octokit } = require('@octokit/rest');
+const config = require('../config');
 
 const octokit = new Octokit({
   auth: config.github.token
@@ -39,4 +38,6 @@ async function fetchOpenPullRequests() {
   }
 }
 
-export { fetchOpenPullRequests };
+module.exports = {
+  fetchOpenPullRequests
+};

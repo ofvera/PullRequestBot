@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle, Github, Clock, Star, MessageCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, Github, Clock, Star, MessageCircle, Calendar } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -17,6 +19,23 @@ function timeUntil(dateString) {
   return `${minutes}m`;
 }
 
+function formatSchedule(schedule) {
+  const [minute, hour, dom, month, dow] = schedule.split(' ');
+  
+  // Convert UTC to local time
+  const today = new Date();
+  const scheduleDate = new Date(today);
+  scheduleDate.setUTCHours(parseInt(hour), parseInt(minute), 0, 0);
+  
+  const localHour = scheduleDate.getHours();
+  const localMinute = scheduleDate.getMinutes();
+  
+  const timeStr = `${localHour.toString().padStart(2, '0')}:${localMinute.toString().padStart(2, '0')}`;
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  
+  return `${timeStr} ${timeZone} on weekdays`;
+}
+
 const StatusDashboard = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,11 +44,24 @@ const StatusDashboard = () => {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const response = await fetch('/api/status');
+        // Try production URL first, fallback to local if needed
+        const baseUrl = process.env.NODE_ENV === 'production' 
+          ? window.location.origin 
+          : 'http://localhost:3000';
+        
+        const response = await fetch(`${baseUrl}/api/status`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new TypeError("Oops, we haven't got JSON!");
+        }
         const result = await response.json();
         setData(result);
         setLoading(false);
       } catch (err) {
+        console.error('Fetch error:', err);
         setError(err.message);
         setLoading(false);
       }
@@ -58,6 +90,16 @@ const StatusDashboard = () => {
     );
   }
 
+  if (!data) {
+    return (
+      <Alert className="max-w-2xl mx-auto mt-8">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>No Data</AlertTitle>
+        <AlertDescription>No status information available</AlertDescription>
+      </Alert>
+    );
+  }
+
   const { botStatus, githubStatus, slackStatus } = data;
 
   return (
@@ -71,13 +113,22 @@ const StatusDashboard = () => {
             <Clock className="h-5 w-5" />
             Next Scheduled Run
           </CardTitle>
+          <CardDescription>
+            Cron Schedule: {formatSchedule(botStatus.cronSchedule)}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
             {timeUntil(botStatus.nextScheduledRun)}
           </div>
-          <div className="text-sm text-gray-500">
-            {new Date(botStatus.nextScheduledRun).toLocaleString()}
+          <div className="text-sm text-gray-500 space-y-1">
+            <div>Next run: {new Date(botStatus.nextScheduledRun).toLocaleString()}</div>
+            <div className="flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              Last check: {new Date(botStatus.lastCheck).toLocaleString()}
+            </div>
+            <div>Version: {botStatus.version}</div>
+            <div>Timezone: {botStatus.timezone}</div>
           </div>
         </CardContent>
       </Card>
@@ -111,6 +162,11 @@ const StatusDashboard = () => {
                       </span>
                     </div>
                   )}
+                  {repo.status === 'error' && (
+                    <div className="text-sm text-red-500">
+                      Error: {repo.error}
+                    </div>
+                  )}
                 </div>
                 {repo.status === 'connected' ? (
                   <CheckCircle className="h-5 w-5 text-green-500" />
@@ -135,9 +191,11 @@ const StatusDashboard = () => {
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
             <div>
               <div className="font-medium">Channel: {slackStatus.channel}</div>
-              <div className="text-sm text-gray-500">
-                Last check: {new Date(botStatus.lastCheck).toLocaleString()}
-              </div>
+              {slackStatus.status === 'error' && (
+                <div className="text-sm text-red-500">
+                  Error: {slackStatus.error}
+                </div>
+              )}
             </div>
             {slackStatus.status === 'connected' ? (
               <CheckCircle className="h-5 w-5 text-green-500" />

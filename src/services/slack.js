@@ -1,7 +1,5 @@
-// src/services/slack.js
-import pkg from '@slack/bolt';
-const { App } = pkg;
-import config from '../config.js';
+const { App } = require('@slack/bolt');
+const config = require('../config');
 
 const app = new App({
   token: config.slack.token,
@@ -13,7 +11,7 @@ function formatPRMessage(prs) {
     return "No open pull requests at the moment.";
   }
 
-  const header = ":github: *Open Pull Requests Update*\n\n";
+  const header = ":eyes: *Open Pull Requests Update*\n\n";
   
   // Group PRs by repository
   const prsByRepo = prs.reduce((acc, pr) => {
@@ -53,4 +51,6 @@ async function sendUpdate(prs) {
   }
 }
 
-export { sendUpdate };
+module.exports = {
+  sendUpdate
+};
